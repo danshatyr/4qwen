@@ -1,34 +1,30 @@
 import subprocess
 import sys
 
-def get_number(prompt):
-    while True:
-        try:
-            return float(input(prompt))
-        except ValueError:
-            print("Invalid input. Please enter a valid number.")
-        except KeyboardInterrupt:
-            print("\nGoodbye!")
-            sys.exit(0)
-
-def ask_qwen(num1, num2):
-    prompt = f"What is the sum of {num1} and {num2}?"
+def ask_qwen(query):
     result = subprocess.run(
-        ["ollama", "run", "qwen3.5", prompt],
+        ["ollama", "run", "qwen3.5", query],
         capture_output=True, text=True
     )
     return result.stdout.strip()
 
+def stop_ollama():
+    subprocess.run(["pkill", "ollama"], capture_output=True)
+
 def main():
+    print("Qwen 3.5 Chat (Ctrl+C to quit)\n")
     try:
-        print("Qwen 3.5 Math Assistant")
-        num1 = get_number("Enter first number: ")
-        num2 = get_number("Enter second number: ")
-        print("\nAsking Qwen 3.5...\n")
-        answer = ask_qwen(num1, num2)
-        print(answer)
+        while True:
+            query = input("You: ")
+            if not query.strip():
+                continue
+            print("\nQwen: ")
+            answer = ask_qwen(query)
+            print(f"{answer}\n")
     except KeyboardInterrupt:
         print("\nGoodbye!")
+        stop_ollama()
+        sys.exit(0)
 
 if __name__ == "__main__":
     main()
