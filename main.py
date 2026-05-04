@@ -3,7 +3,7 @@ import subprocess
 import sys
 import urllib.request
 
-API_URL = "http://localhost:11434/api/generate"
+API_URL = "http://127.0.0.1:11434/api/generate"
 
 def ask_qwen(sender, message):
     prompt = f"""You are a secretary analyzing incoming messages. Analyze the following message and answer exactly these 4 questions:
