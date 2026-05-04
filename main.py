@@ -1,5 +1,9 @@
+import json
 import subprocess
 import sys
+import urllib.request
+
+API_URL = "http://localhost:11434/api/generate"
 
 def ask_qwen(sender, message):
     prompt = f"""You are a secretary analyzing incoming messages. Analyze the following message and answer exactly these 4 questions:
@@ -14,11 +18,21 @@ Message: {message}
 
 Provide a concise analysis answering each question."""
 
-    result = subprocess.run(
-        ["ollama", "run", "qwen3.5", prompt],
-        capture_output=True, text=True
+    payload = json.dumps({
+        "model": "qwen3.5",
+        "prompt": prompt,
+        "stream": False
+    }).encode("utf-8")
+
+    req = urllib.request.Request(
+        API_URL,
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST"
     )
-    return result.stdout.strip()
+
+    with urllib.request.urlopen(req, timeout=120) as response:
+        return json.loads(response.read().decode("utf-8"))["response"].strip()
 
 def stop_ollama():
     subprocess.run(["pkill", "ollama"], capture_output=True)
@@ -35,8 +49,7 @@ def main():
                 continue
 
             print("\nAnalyzing...\n")
-            analysis = ask_qwen(sender, message)
-            print(f"{analysis}\n")
+            print(ask_qwen(sender, message), "\n")
     except KeyboardInterrupt:
         print("\nGoodbye!")
         stop_ollama()
